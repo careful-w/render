@@ -1,0 +1,17 @@
+# CLion IDE
+.idea/
+cmake-build-*/
+*.iml
+compile_commands.json
+
+# 编译输出
+*.exe
+*.o
+*.obj
+*.a
+*.lib
+*.dll
+
+#系统垃圾文件
+Thumbs.db
+.DS_Store
