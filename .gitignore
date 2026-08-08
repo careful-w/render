@@ -1,5 +1,6 @@
 # CLion IDE
 .idea/
+build_test/
 cmake-build-*/
 *.iml
 compile_commands.json
