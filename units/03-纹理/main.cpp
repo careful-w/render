@@ -12,10 +12,6 @@
 #include <cstdlib>
 #include <ctime>
 
-/**
- *练习内容片段着色器将纹理采样颜色与顶点插值颜色进行混合。通过键盘上的上/ 下键调整混合因子
- */ 
-
 // 从文件读取 shader 源码
 std::string readShaderFile(const char* filePath) {
     std::ifstream file(filePath);
@@ -49,8 +45,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
-float mixValue = 0.2f;//混合因子
-unsigned int blendMode = -1;//混合模式
 
 // 加载纹理（自动适配 RGB/RGBA 通道）
 unsigned int loadTexture(const char* path) {
@@ -91,17 +85,6 @@ void processInput(GLFWwindow* window) {
         offset.y += 0.1f;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         offset.y -= 0.1f;
-
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        mixValue += 0.1f;
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        mixValue -= 0.1f;
-    if(glfwGetKey(window, GLFW_KEY_0)==GLFW_PRESS)
-        blendMode = 0;
-    if(glfwGetKey(window, GLFW_KEY_1)==GLFW_PRESS)
-        blendMode = 1;
-    if(glfwGetKey(window, GLFW_KEY_2)==GLFW_PRESS)
-        blendMode = 2;
 }
 
 //初始化窗口
@@ -239,14 +222,13 @@ int main() {
     unsigned int texture2 = loadTexture("image/awesomeface.png");
 
     // 创建着色器程序
-    unsigned int shaderProgram = createSimpleShader("shaders/triangle.vert", "shaders/triangle.frag");
+    unsigned int shaderProgram = createSimpleShader("units/03-纹理/shaders/triangle.vert", "units/03-纹理/shaders/triangle.frag");
     glUseProgram(shaderProgram);
 
     glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
     glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
 
-    GLint mixValueLoc = glGetUniformLocation(shaderProgram, "mixValue");
-    GLint blendModeLoc = glGetUniformLocation(shaderProgram, "blendMode");
+
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);//输入事件
@@ -254,9 +236,6 @@ int main() {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUniform1f(mixValueLoc, mixValue);
-        glUniform1f(blendModeLoc, blendMode);
-        
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);

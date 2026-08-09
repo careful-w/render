@@ -33,10 +33,23 @@ if(WIN32)
     target_link_libraries(OpenGL PRIVATE opengl32)
 endif()
 
-# 复制 shaders 到输出目录
-add_custom_command(TARGET OpenGL POST_BUILD
+# 收集资源文件
+file(GLOB_RECURSE ASSET_SOURCES
+    "${CMAKE_SOURCE_DIR}/shaders/*"
+    "${CMAKE_SOURCE_DIR}/image/*"
+)
+
+# 自定义 target：依赖所有 shader/image 源文件，文件变化时自动重新复制
+add_custom_target(copy_assets ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_SOURCE_DIR}/shaders"
     "$<TARGET_FILE_DIR:OpenGL>/shaders"
-    COMMENT "Copying shaders to build directory"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_SOURCE_DIR}/image"
+    "$<TARGET_FILE_DIR:OpenGL>/image"
+    COMMENT "Copying shaders and images to build directory"
+    DEPENDS ${ASSET_SOURCES}
 )
+
+# 确保 OpenGL 链接前先复制资源
+add_dependencies(OpenGL copy_assets)

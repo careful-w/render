@@ -1,20 +1,14 @@
+/**
+ *练习内容片段着色器将纹理采样颜色与顶点插值颜色进行混合。通过键盘上的上/ 下键调整混合因子
+ */ 
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-#include <vector>
-#include <cstdlib>
-#include <ctime>
-
-/**
- *练习内容片段着色器将纹理采样颜色与顶点插值颜色进行混合。通过键盘上的上/ 下键调整混合因子
- */ 
 
 // 从文件读取 shader 源码
 std::string readShaderFile(const char* filePath) {
@@ -42,15 +36,13 @@ unsigned int indices[] = {
     0,1,3,
     1,2,3
 };
-//移动方向
-glm::vec3 offset = glm::vec3(0.0f, 0.0f, 0.0f);
+
+float mixValue = 0.2f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
-float mixValue = 0.2f;//混合因子
-unsigned int blendMode = -1;//混合模式
 
 // 加载纹理（自动适配 RGB/RGBA 通道）
 unsigned int loadTexture(const char* path) {
@@ -83,25 +75,13 @@ unsigned int loadTexture(const char* path) {
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        offset.x += 0.1f;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        offset.x -= 0.1f;
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        offset.y += 0.1f;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        offset.y -= 0.1f;
-
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-        mixValue += 0.1f;
+        mixValue += 0.01f;
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-        mixValue -= 0.1f;
-    if(glfwGetKey(window, GLFW_KEY_0)==GLFW_PRESS)
-        blendMode = 0;
-    if(glfwGetKey(window, GLFW_KEY_1)==GLFW_PRESS)
-        blendMode = 1;
-    if(glfwGetKey(window, GLFW_KEY_2)==GLFW_PRESS)
-        blendMode = 2;
+        mixValue -= 0.01f;
+    // 限制范围
+    if (mixValue > 1.0f) mixValue = 1.0f;
+    if (mixValue < 0.0f) mixValue = 0.0f;
 }
 
 //初始化窗口
@@ -114,10 +94,10 @@ GLFWwindow* inte() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     //创建窗口
-    GLFWwindow* window = glfwCreateWindow(800,600,"window",NULL,NULL);
+    GLFWwindow* window = glfwCreateWindow(800,600,"练习1：纹理+颜色混合",NULL,NULL);
     if (!window) {
         std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();//终止
+        glfwTerminate();
         exit(-1);
     }
     //设置到当前上下文
@@ -235,39 +215,28 @@ int main() {
 
     // 加载纹理
     unsigned int texture1 = loadTexture("image/container.jpg");
-    stbi_set_flip_vertically_on_load(true);//因为第二张图片y轴0,0在顶部。第二张图片需要翻转
-    unsigned int texture2 = loadTexture("image/awesomeface.png");
 
     // 创建着色器程序
-    unsigned int shaderProgram = createSimpleShader("shaders/triangle.vert", "shaders/triangle.frag");
+    unsigned int shaderProgram = createSimpleShader("units/03-纹理/练习/shaders/triangle.vert", "units/03-纹理/练习/shaders/triangle.frag");
     glUseProgram(shaderProgram);
 
     glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
-    glUniform1i(glGetUniformLocation(shaderProgram, "texture2"), 1);
 
     GLint mixValueLoc = glGetUniformLocation(shaderProgram, "mixValue");
-    GLint blendModeLoc = glGetUniformLocation(shaderProgram, "blendMode");
     while(!glfwWindowShouldClose(window))
     {
         processInput(window);//输入事件
         //清空颜色屏幕
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-
         glUniform1f(mixValueLoc, mixValue);
-        glUniform1f(blendModeLoc, blendMode);
-        
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
 
         glUseProgram(shaderProgram);
         glBindVertexArray(VAO);
         //按照索引去绘制
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        //按照点去绘制
-        // glDrawArrays(GL_TRIANGLES, 0, 3);
         // 检查并调用事件，交换缓冲
         glfwSwapBuffers(window);
         glfwPollEvents();
