@@ -20,7 +20,7 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
-# 可执行文件（当前运行单元：04-光线追踪，源码即根目录 main.cpp）
+# 可执行文件（当前运行单元：05-流体水，源码即根目录 main.cpp）
 add_executable(OpenGL main.cpp)
 
 target_link_libraries(OpenGL PRIVATE
@@ -38,6 +38,7 @@ file(GLOB_RECURSE ASSET_SOURCES
     "${CMAKE_SOURCE_DIR}/shaders/*"
     "${CMAKE_SOURCE_DIR}/image/*"
     "${CMAKE_SOURCE_DIR}/units/04-光线追踪/shaders/*"
+    "${CMAKE_SOURCE_DIR}/units/05-流体水/shaders/*"
 )
 
 # 自定义 target：依赖所有 shader/image 源文件，文件变化时自动重新复制
@@ -50,6 +51,9 @@ add_custom_target(copy_assets ALL
     "$<TARGET_FILE_DIR:OpenGL>/image"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_SOURCE_DIR}/units/04-光线追踪/shaders"
+    "$<TARGET_FILE_DIR:OpenGL>/shaders"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_SOURCE_DIR}/units/05-流体水/shaders"
     "$<TARGET_FILE_DIR:OpenGL>/shaders"
     COMMENT "Copying shaders and images to build directory"
     DEPENDS ${ASSET_SOURCES}
